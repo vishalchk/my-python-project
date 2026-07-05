@@ -14,13 +14,32 @@ def is_prime(n):
     return True
 
 
-def main():
-    if len(sys.argv) != 2:
-        print("Usage: python main.py <number>")
-        sys.exit(1)
+def sieve(limit):
+    if limit < 2:
+        return []
 
-    n = int(sys.argv[1])
-    print(f"{n} is {'prime' if is_prime(n) else 'not prime'}")
+    is_candidate = [True] * (limit + 1)
+    is_candidate[0] = is_candidate[1] = False
+
+    for number in range(2, int(limit**0.5) + 1):
+        if is_candidate[number]:
+            for multiple in range(number * number, limit + 1, number):
+                is_candidate[multiple] = False
+
+    return [n for n, prime in enumerate(is_candidate) if prime]
+
+
+def main():
+    if len(sys.argv) == 3 and sys.argv[1] == "--sieve":
+        limit = int(sys.argv[2])
+        print(sieve(limit))
+    elif len(sys.argv) == 2:
+        n = int(sys.argv[1])
+        print(f"{n} is {'prime' if is_prime(n) else 'not prime'}")
+    else:
+        print("Usage: python main.py <number>")
+        print("       python main.py --sieve <limit>")
+        sys.exit(1)
 
 
 if __name__ == "__main__":
