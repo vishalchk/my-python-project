@@ -1,4 +1,4 @@
-import sys
+import argparse
 
 
 def is_prime(n):
@@ -58,21 +58,31 @@ def sieve(limit):
     return [n for n, prime in enumerate(is_candidate) if prime]
 
 
+def build_parser():
+    parser = argparse.ArgumentParser(description="Check and generate prime numbers.")
+    subparsers = parser.add_subparsers(dest="command", required=True)
+
+    check_parser = subparsers.add_parser("check", help="Check if a number is prime (trial division)")
+    check_parser.add_argument("number", type=int)
+
+    sieve_parser = subparsers.add_parser("sieve", help="List all primes up to a limit")
+    sieve_parser.add_argument("limit", type=int)
+
+    large_parser = subparsers.add_parser("large", help="Check if a large number is prime (Miller-Rabin)")
+    large_parser.add_argument("number", type=int)
+
+    return parser
+
+
 def main():
-    if len(sys.argv) == 3 and sys.argv[1] == "--sieve":
-        limit = int(sys.argv[2])
-        print(sieve(limit))
-    elif len(sys.argv) == 3 and sys.argv[1] == "--large":
-        n = int(sys.argv[2])
-        print(f"{n} is {'prime' if is_prime_miller_rabin(n) else 'not prime'}")
-    elif len(sys.argv) == 2:
-        n = int(sys.argv[1])
-        print(f"{n} is {'prime' if is_prime(n) else 'not prime'}")
-    else:
-        print("Usage: python main.py <number>")
-        print("       python main.py --sieve <limit>")
-        print("       python main.py --large <number>")
-        sys.exit(1)
+    args = build_parser().parse_args()
+
+    if args.command == "check":
+        print(f"{args.number} is {'prime' if is_prime(args.number) else 'not prime'}")
+    elif args.command == "sieve":
+        print(sieve(args.limit))
+    elif args.command == "large":
+        print(f"{args.number} is {'prime' if is_prime_miller_rabin(args.number) else 'not prime'}")
 
 
 if __name__ == "__main__":
