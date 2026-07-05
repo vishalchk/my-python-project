@@ -58,6 +58,16 @@ def sieve(limit):
     return [n for n, prime in enumerate(is_candidate) if prime]
 
 
+def gcd(a, b):
+    while b:
+        a, b = b, a % b
+    return a
+
+
+def is_coprime(a, b):
+    return gcd(a, b) == 1
+
+
 def first_n_primes(count):
     primes = []
     candidate = 2
@@ -110,6 +120,10 @@ def build_parser():
     plot_parser.add_argument("count", type=int, nargs="?", default=10)
     plot_parser.add_argument("--output", default="primes_plot.png")
 
+    coprime_parser = subparsers.add_parser("coprime", help="Check if two numbers are coprime (gcd == 1)")
+    coprime_parser.add_argument("a", type=int)
+    coprime_parser.add_argument("b", type=int)
+
     return parser
 
 
@@ -124,6 +138,9 @@ def main():
         print(f"{args.number} is {'prime' if is_prime_miller_rabin(args.number) else 'not prime'}")
     elif args.command == "plot":
         plot_primes(args.count, args.output)
+    elif args.command == "coprime":
+        result = is_coprime(args.a, args.b)
+        print(f"{args.a} and {args.b} are {'coprime' if result else 'not coprime'} (gcd = {gcd(args.a, args.b)})")
 
 
 if __name__ == "__main__":

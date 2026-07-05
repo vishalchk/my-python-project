@@ -1,4 +1,4 @@
-from main import is_prime, is_prime_miller_rabin, sieve
+from main import gcd, is_coprime, is_prime, is_prime_miller_rabin, sieve
 
 
 def test_is_prime_below_two():
@@ -59,3 +59,27 @@ def test_miller_rabin_large_mersenne_prime():
 
 def test_miller_rabin_large_composite():
     assert is_prime_miller_rabin(2305843009213693951 * 3) is False
+
+
+def test_gcd():
+    assert gcd(14, 15) == 1
+    assert gcd(12, 18) == 6
+    assert gcd(0, 5) == 5
+    assert gcd(7, 7) == 7
+
+
+def test_is_coprime_true():
+    assert is_coprime(14, 15) is True
+    assert is_coprime(17, 5) is True
+    assert is_coprime(1, 100) is True
+
+
+def test_is_coprime_false():
+    assert is_coprime(12, 18) is False
+    assert is_coprime(10, 20) is False
+
+
+def test_is_coprime_two_distinct_primes():
+    # Any two distinct primes are always coprime.
+    for a, b in ((2, 3), (5, 11), (13, 97)):
+        assert is_coprime(a, b) is True

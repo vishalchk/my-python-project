@@ -8,6 +8,8 @@ problem size grows:
   faster than checking each number individually.
 - **Deterministic Miller-Rabin** (`large`) — a primality test that stays fast
   even on numbers with 20+ digits, where trial division would never finish.
+- **Euclidean algorithm** (`coprime`) — checks whether two numbers share no
+  common factors (gcd == 1).
 
 ## Setup
 
@@ -31,6 +33,9 @@ python main.py large 2305843009213693951
 
 python main.py plot 10
 # Saved plot to primes_plot.png (index vs. value chart of the first 10 primes)
+
+python main.py coprime 14 15
+# 14 and 15 are coprime (gcd = 1)
 ```
 
 Run `python main.py --help` for the full command reference.
@@ -41,9 +46,9 @@ Run `python main.py --help` for the full command reference.
 pytest
 ```
 
-12 tests cover edge cases (negatives, 0, 1), known primes and composites,
+16 tests cover edge cases (negatives, 0, 1), known primes and composites,
 Carmichael numbers (which fool naive Fermat-style tests but are correctly
-rejected by Miller-Rabin), and a large Mersenne prime.
+rejected by Miller-Rabin), a large Mersenne prime, and gcd/coprime checks.
 
 ## License
 
