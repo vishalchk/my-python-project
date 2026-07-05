@@ -1,4 +1,4 @@
-from main import is_prime, sieve
+from main import is_prime, is_prime_miller_rabin, sieve
 
 
 def test_is_prime_below_two():
@@ -33,3 +33,29 @@ def test_sieve_small_limit():
 def test_sieve_agrees_with_is_prime():
     limit = 500
     assert sieve(limit) == [n for n in range(2, limit + 1) if is_prime(n)]
+
+
+def test_miller_rabin_below_two():
+    assert is_prime_miller_rabin(-5) is False
+    assert is_prime_miller_rabin(0) is False
+    assert is_prime_miller_rabin(1) is False
+
+
+def test_miller_rabin_agrees_with_is_prime():
+    limit = 2000
+    for n in range(limit):
+        assert is_prime_miller_rabin(n) == is_prime(n)
+
+
+def test_miller_rabin_carmichael_numbers():
+    # Carmichael numbers fool the naive Fermat primality test but are composite.
+    for n in (561, 1105, 1729, 2465, 2821):
+        assert is_prime_miller_rabin(n) is False
+
+
+def test_miller_rabin_large_mersenne_prime():
+    assert is_prime_miller_rabin(2305843009213693951) is True  # 2**61 - 1
+
+
+def test_miller_rabin_large_composite():
+    assert is_prime_miller_rabin(2305843009213693951 * 3) is False
