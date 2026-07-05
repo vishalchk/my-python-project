@@ -58,6 +58,41 @@ def sieve(limit):
     return [n for n, prime in enumerate(is_candidate) if prime]
 
 
+def first_n_primes(count):
+    primes = []
+    candidate = 2
+    while len(primes) < count:
+        if is_prime(candidate):
+            primes.append(candidate)
+        candidate += 1
+    return primes
+
+
+def plot_primes(count, output_path):
+    import matplotlib.pyplot as plt
+
+    primes = first_n_primes(count)
+    indices = list(range(1, count + 1))
+
+    fig, ax = plt.subplots(figsize=(6, 4))
+    ax.plot(indices, primes, color="#2563eb", linewidth=2, marker="o", markersize=6)
+
+    for x, y in zip(indices, primes):
+        ax.annotate(str(y), (x, y), textcoords="offset points", xytext=(0, 8), ha="center", fontsize=8)
+
+    ax.set_xlabel("Index (nth prime)")
+    ax.set_ylabel("Prime value")
+    ax.set_title(f"First {count} Prime Numbers")
+    ax.set_xticks(indices)
+    ax.grid(True, linewidth=0.5, alpha=0.3)
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+
+    fig.tight_layout()
+    fig.savefig(output_path, dpi=150)
+    print(f"Saved plot to {output_path}")
+
+
 def build_parser():
     parser = argparse.ArgumentParser(description="Check and generate prime numbers.")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -71,6 +106,10 @@ def build_parser():
     large_parser = subparsers.add_parser("large", help="Check if a large number is prime (Miller-Rabin)")
     large_parser.add_argument("number", type=int)
 
+    plot_parser = subparsers.add_parser("plot", help="Plot the first N primes (index vs value)")
+    plot_parser.add_argument("count", type=int, nargs="?", default=10)
+    plot_parser.add_argument("--output", default="primes_plot.png")
+
     return parser
 
 
@@ -83,6 +122,8 @@ def main():
         print(sieve(args.limit))
     elif args.command == "large":
         print(f"{args.number} is {'prime' if is_prime_miller_rabin(args.number) else 'not prime'}")
+    elif args.command == "plot":
+        plot_primes(args.count, args.output)
 
 
 if __name__ == "__main__":

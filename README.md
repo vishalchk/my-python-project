@@ -28,6 +28,9 @@ python main.py sieve 30
 
 python main.py large 2305843009213693951
 # 2305843009213693951 is prime
+
+python main.py plot 10
+# Saved plot to primes_plot.png (index vs. value chart of the first 10 primes)
 ```
 
 Run `python main.py --help` for the full command reference.
