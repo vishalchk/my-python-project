@@ -1,4 +1,6 @@
 import argparse
+import secrets
+import sys
 
 
 def is_prime(n):
@@ -68,6 +70,56 @@ def is_coprime(a, b):
     return gcd(a, b) == 1
 
 
+def generate_prime(bits):
+    while True:
+        candidate = secrets.randbits(bits) | (1 << (bits - 1)) | 1
+        if is_prime_miller_rabin(candidate):
+            return candidate
+
+
+def mod_inverse(e, phi):
+    """Extended Euclidean algorithm: find d such that (e * d) % phi == 1."""
+    old_r, r = e, phi
+    old_s, s = 1, 0
+    while r != 0:
+        quotient = old_r // r
+        old_r, r = r, old_r - quotient * r
+        old_s, s = s, old_s - quotient * s
+    return old_s % phi
+
+
+def generate_rsa_keypair(bits):
+    p = generate_prime(bits)
+    q = generate_prime(bits)
+    while q == p:
+        q = generate_prime(bits)
+
+    n = p * q
+    phi = (p - 1) * (q - 1)
+
+    e = 65537
+    while not is_coprime(e, phi):
+        e += 2
+
+    d = mod_inverse(e, phi)
+    return (e, n), (d, n)
+
+
+def rsa_encrypt(message, public_key):
+    e, n = public_key
+    m = int.from_bytes(message.encode(), "big")
+    if m >= n:
+        raise ValueError("Message too long for this key size; use more --bits")
+    return pow(m, e, n)
+
+
+def rsa_decrypt(ciphertext, private_key):
+    d, n = private_key
+    m = pow(ciphertext, d, n)
+    length = (m.bit_length() + 7) // 8
+    return m.to_bytes(length, "big").decode()
+
+
 def first_n_primes(count):
     primes = []
     candidate = 2
@@ -124,6 +176,10 @@ def build_parser():
     coprime_parser.add_argument("a", type=int)
     coprime_parser.add_argument("b", type=int)
 
+    rsa_parser = subparsers.add_parser("rsa", help="Toy RSA demo: generate keys, encrypt & decrypt a message")
+    rsa_parser.add_argument("message")
+    rsa_parser.add_argument("--bits", type=int, default=256, help="Bit length of each prime (default: 256)")
+
     return parser
 
 
@@ -141,6 +197,23 @@ def main():
     elif args.command == "coprime":
         result = is_coprime(args.a, args.b)
         print(f"{args.a} and {args.b} are {'coprime' if result else 'not coprime'} (gcd = {gcd(args.a, args.b)})")
+    elif args.command == "rsa":
+        public_key, private_key = generate_rsa_keypair(args.bits)
+        e, n = public_key
+        d, _ = private_key
+
+        try:
+            ciphertext = rsa_encrypt(args.message, public_key)
+        except ValueError as error:
+            print(f"Error: {error}")
+            sys.exit(1)
+
+        plaintext = rsa_decrypt(ciphertext, private_key)
+
+        print(f"Public key  (e, n): ({e}, {n})")
+        print(f"Private key (d, n): ({d}, {n})")
+        print(f"Ciphertext: {ciphertext}")
+        print(f"Decrypted:  {plaintext}")
 
 
 if __name__ == "__main__":

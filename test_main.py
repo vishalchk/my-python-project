@@ -1,4 +1,17 @@
-from main import gcd, is_coprime, is_prime, is_prime_miller_rabin, sieve
+import pytest
+
+from main import (
+    gcd,
+    generate_prime,
+    generate_rsa_keypair,
+    is_coprime,
+    is_prime,
+    is_prime_miller_rabin,
+    mod_inverse,
+    rsa_decrypt,
+    rsa_encrypt,
+    sieve,
+)
 
 
 def test_is_prime_below_two():
@@ -83,3 +96,28 @@ def test_is_coprime_two_distinct_primes():
     # Any two distinct primes are always coprime.
     for a, b in ((2, 3), (5, 11), (13, 97)):
         assert is_coprime(a, b) is True
+
+
+def test_generate_prime_returns_a_prime_of_requested_size():
+    prime = generate_prime(64)
+    assert is_prime_miller_rabin(prime) is True
+    assert prime.bit_length() == 64
+
+
+def test_mod_inverse_textbook_example():
+    # Classic textbook RSA example: e=17, phi=3120 -> d=2753.
+    assert mod_inverse(17, 3120) == 2753
+    assert (17 * 2753) % 3120 == 1
+
+
+def test_rsa_round_trip():
+    public_key, private_key = generate_rsa_keypair(128)
+    for message in ("HI", "Hello, RSA!", "prime numbers rock"):
+        ciphertext = rsa_encrypt(message, public_key)
+        assert rsa_decrypt(ciphertext, private_key) == message
+
+
+def test_rsa_message_too_long_raises():
+    public_key, _ = generate_rsa_keypair(64)
+    with pytest.raises(ValueError):
+        rsa_encrypt("x" * 100, public_key)
